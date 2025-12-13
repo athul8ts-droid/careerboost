@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+            <h2 class="mb-4 text-center">Resume Analysis Result</h2>
+
+            <!-- AI Match Score -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">ATS Match Score</h4>
+                    <h3 class="text-primary fw-bold">{{ match_percent }}%</h3>
+
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ match_percent }}%;" aria-valuenow="{{ match_percent }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                             {{ match_percent }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Found in Resume -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h4>✔ Skills Found in Your Resume</h4>
+                    {% if resume_skills %}
+                        <ul class="list-group">
+                            {% for skill in resume_skills %}
+                                <li class="list-group-item">{{ skill }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No skills detected.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Job Required Keywords -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h4>📌 Job Required Skills (Keywords)</h4>
+                    {% if job_keywords %}
+                        <ul class="list-group">
+                            {% for skill in job_keywords %}
+                                <li class="list-group-item">{{ skill }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No keywords from job description.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Matched Skills -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h4 class="text-success">✔ Matched Skills</h4>
+                    {% if matched %}
+                        <ul class="list-group">
+                            {% for skill in matched %}
+                                <li class="list-group-item list-group-item-success">{{ skill }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No matching skills found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Missing Skills -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h4 class="text-danger">❌ Missing Skills</h4>
+                    {% if missing %}
+                        <ul class="list-group">
+                            {% for skill in missing %}
+                                <li class="list-group-item list-group-item-danger">{{ skill }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No missing skills — great!</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Resume Text -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h4>📝 Extracted Resume Text</h4>
+                    <pre style="white-space: pre-wrap; background: #f8f9fa; padding: 15px;">{{ resume_text }}</pre>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'upload_resume' %}" class="btn btn-primary">Upload Another Resume</a>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Home</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

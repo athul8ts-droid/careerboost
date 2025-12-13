@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-4">Welcome, {{ user.username }} 👋</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h5>Upload Resume</h5>
+                <p>Analyze your resume with AI</p>
+                <a href="/resume/upload/" class="btn btn-primary">Upload</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h5>Job Listings</h5>
+                <p>Find opportunities that match your skills</p>
+               <a href="{% url 'job_list' %}" class="btn btn-primary">View Jobs</a>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

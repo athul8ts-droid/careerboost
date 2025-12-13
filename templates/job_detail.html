@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h2 class="mb-1">{{ job.title }}</h2>
+            <p class="text-muted mb-4">{{ job.company }} • {{ job.location }}</p>
+
+            <h5 class="fw-bold">Job Description</h5>
+            <p style="white-space: pre-line;">{{ job.description }}</p>
+
+            <div class="d-flex gap-2 mt-4">
+                <a href="{% url 'job_list' %}" class="btn btn-secondary">
+                    ← Back to Jobs
+                </a>
+
+                {% if user.is_superuser %}
+                <a href="{% url 'delete_job' job.id %}"
+                   class="btn btn-danger"
+                   onclick="return confirm('Are you sure you want to delete this job?');">
+                    Delete Job
+                </a>
+                {% endif %}
+
+                <!-- Apply Button well aligned -->
+                <a href="{% url 'apply_job' job.id %}" class="btn btn-success ms-auto">
+                    Apply Now
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

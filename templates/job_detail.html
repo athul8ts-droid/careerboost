@@ -1,37 +1,50 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% block title %}{{ job.title }}{% endblock %}
+
 {% block content %}
-
 <div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-body">
 
-            <h2 class="mb-1">{{ job.title }}</h2>
-            <p class="text-muted mb-4">{{ job.company }} • {{ job.location }}</p>
+    <h2>{{ job.title }}</h2>
+    <p><strong>Location:</strong> {{ job.location }}</p>
+    <p><strong>Company:</strong> {{ job.company_name }}</p>
+    <p><strong>Posted on:</strong> {{ job.created_at|date:"d M Y" }}</p>
 
-            <h5 class="fw-bold">Job Description</h5>
-            <p style="white-space: pre-line;">{{ job.description }}</p>
+    <hr>
 
-            <div class="d-flex gap-2 mt-4">
-                <a href="{% url 'job_list' %}" class="btn btn-secondary">
-                    ← Back to Jobs
-                </a>
+    <h5>Job Description</h5>
+    <p>{{ job.description }}</p>
 
-                {% if user.is_superuser %}
-                <a href="{% url 'delete_job' job.id %}"
-                   class="btn btn-danger"
-                   onclick="return confirm('Are you sure you want to delete this job?');">
-                    Delete Job
-                </a>
-                {% endif %}
+    <h5>Required Skills</h5>
+    <p>{{ job.skills_required }}</p>
 
-                <!-- Apply Button well aligned -->
-                <a href="{% url 'apply_job' job.id %}" class="btn btn-success ms-auto">
-                    Apply Now
-                </a>
-            </div>
+    <hr>
 
-        </div>
-    </div>
+    {% if user.is_authenticated %}
+
+        {% if user.is_superuser or user.is_staff %}
+            <!-- Admin should not apply -->
+            <p class="text-muted">Admins cannot apply for jobs.</p>
+
+        {% elif user.profile.role == "recruiter" %}
+            <!-- Recruiter should not apply -->
+            <p class="text-muted">Recruiters cannot apply for jobs.</p>
+
+        {% elif has_applied %}
+            <button class="btn btn-secondary" disabled>
+                Already Applied
+            </button>
+
+        {% else %}
+            <a href="{% url 'job_app:apply_job' job.id %}" class="btn btn-primary">
+                Apply for Job
+            </a>
+        {% endif %}
+
+    {% else %}
+        <a href="{% url 'login' %}" class="btn btn-warning">
+            Login to Apply
+        </a>
+    {% endif %}
+
 </div>
-
 {% endblock %}

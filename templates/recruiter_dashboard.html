@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Recruiter Dashboard 🧑‍💼</h2>
+<p>Post jobs and manage applications.</p>
+
+<!-- Recruiter Approval Status -->
+{% if user.is_approved %}
+    <p style="color: green;">✅ Approved Recruiter</p>
+
+    <a href="{% url 'job_app:add_job' %}" class="btn btn-primary">
+        Post New Job
+    </a>
+{% else %}
+    <p style="color: orange;">⏳ Pending Approval</p>
+
+    <button class="btn btn-secondary" disabled>
+        Post New Job (Approval Required)
+    </button>
+
+    <p style="margin-top:10px;">
+        Your account is under admin review. You’ll be notified once approved.
+    </p>
+{% endif %}
+
+<hr>
+
+<!-- Recruiter Posted Jobs -->
+<h3>My Posted Jobs</h3>
+
+{% if jobs %}
+  <ul>
+    {% for job in jobs %}
+      <li style="margin-bottom:15px;">
+        <strong>{{ job.title }}</strong><br>
+        {{ job.location }}<br>
+        Posted on {{ job.created_at|date:"d M Y" }}
+
+        <br><br>
+
+        <!-- ✅ VIEW APPLICANTS BUTTON -->
+        <a class="btn btn-primary btn-sm"
+           href="{% url 'job_app:view_applicants' job.id %}">
+          View Applicants ({{ job.applications.count }})
+        </a>
+
+        <!-- DELETE JOB -->
+        <a class="btn btn-danger btn-sm"
+           href="{% url 'job_app:delete_job' job.id %}">
+          Delete Job
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You haven’t posted any jobs yet.</p>
+{% endif %}
+
+{% endblock %}

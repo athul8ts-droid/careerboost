@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+  <h2>Recruiter Registration</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <h5 class="mt-4">Account Details</h5>
+
+    <div class="mb-3">
+      <label>Username</label>
+      <input type="text" name="username" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Password</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <h5 class="mt-4">Company Details</h5>
+
+    <div class="mb-3">
+      <label>Company Name</label>
+      <input type="text" name="company_name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Company Email</label>
+      <input type="email" name="company_email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Phone Number</label>
+      <input type="text" name="phone_number" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Place</label>
+      <input type="text" name="place" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Pincode</label>
+      <input type="text" name="pincode" class="form-control" required>
+    </div>
+
+    <button class="btn btn-primary mt-3">
+      Register as Recruiter
+    </button>
+  </form>
+</div>
+
+{% endblock %}

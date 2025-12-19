@@ -18,6 +18,6 @@
     <button type="submit" class="btn btn-primary">Submit Application</button>
 </form>
 
-<a href="{% url 'job_detail' job.id %}" class="btn btn-secondary mt-3">Back</a>
+<a href="{% url 'job_app:job_detail' job.id %}" class="btn btn-secondary mt-3">Back</a>
 
 {% endblock %}

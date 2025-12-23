@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Reply to Message{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Reply to User</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>{{ msg.subject }}</h5>
+            <p>{{ msg.message }}</p>
+
+            <p class="text-muted">
+                From: {{ msg.user.username }} |
+                {{ msg.created_at|date:"d M Y, H:i" }}
+            </p>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Admin Reply</label>
+            {{ form.admin_reply }}
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            Send Reply
+        </button>
+
+        <a href="{% url 'support:admin_message_list' %}"
+           class="btn btn-secondary ms-2">
+            Back
+        </a>
+    </form>
+</div>
+{% endblock %}
+

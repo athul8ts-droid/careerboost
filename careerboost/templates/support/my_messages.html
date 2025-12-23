@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Messages</h2>
+
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <strong>Subject:</strong> {{ msg.subject }} <br>
+                    <strong>Your Message:</strong>
+                    <p>{{ msg.message }}</p>
+
+                    {% if msg.admin_reply %}
+                        <hr>
+                        <strong>Admin Reply:</strong>
+                        <p>{{ msg.admin_reply }}</p>
+                    {% else %}
+                        <em>No reply yet</em>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No messages yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

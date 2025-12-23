@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Messages{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Support Messages</h2>
+
+    {% if messages %}
+        <div class="list-group">
+            {% for msg in messages %}
+                <div class="list-group-item mb-3">
+                    <h5>
+                        {{ msg.subject }}
+                        <small class="text-muted">
+                            — {{ msg.user.username }}
+                        </small>
+                    </h5>
+
+                    <p>{{ msg.message }}</p>
+
+                    <p class="text-muted">
+                        Sent on {{ msg.created_at|date:"d M Y, H:i" }}
+                    </p>
+
+                    {% if msg.admin_reply %}
+                        <div class="alert alert-success">
+                            <strong>Admin Reply:</strong><br>
+                            {{ msg.admin_reply }}
+                        </div>
+                    {% else %}
+                        <a href="{% url 'support:admin_reply' msg.id %}"
+                           class="btn btn-sm btn-primary">
+                            Reply
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No messages yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

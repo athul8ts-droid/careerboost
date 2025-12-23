@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Blocked Recruiters</h2>
+
+    {% if recruiters %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Place</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th style="width: 120px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in recruiters %}
+                <tr>
+                    <td>{{ profile.user.username }}</td>
+                    <td>{{ profile.user.email }}</td>
+                    <td>{{ profile.company_name }}</td>
+                    <td>{{ profile.place }}</td>
+                    <td>{{ profile.phone_number|default:"—" }}</td>
+                    <td>
+                        <span class="badge bg-danger">Blocked</span>
+                    </td>
+                    <td>
+                        <!-- IMPORTANT: use USER ID, not profile.id -->
+                        <a href="{% url 'accounts:unblock_recruiter' profile.user.id %}"
+                           class="btn btn-success btn-sm">
+                            Unblock
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">
+            No blocked recruiters found.
+        </div>
+    {% endif %}
+
+    <a href="{% url 'accounts:approved_recruiters' %}"
+       class="btn btn-secondary mt-3">
+        ← Back to Approved Recruiters
+    </a>
+</div>
+{% endblock %}

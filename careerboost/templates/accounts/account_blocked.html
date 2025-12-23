@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-body text-center">
+            <h4 class="mb-3 text-danger">Account Blocked</h4>
+
+            <p>
+                Your recruiter account has been blocked by the admin.
+            </p>
+
+            <p>
+                Please contact support to resolve this issue.
+            </p>
+
+           <p class="fw-bold">
+                📧 {{ admin_email }}
+            </p>
+
+            <a href="{% url 'accounts:contact_admin' %}"
+            class="btn btn-primary mt-2">
+                Contact Admin
+            </a>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

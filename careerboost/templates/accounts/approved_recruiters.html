@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Approved Recruiters</h2>
+
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>Place</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recruiter in recruiters %}
+            <tr>
+                <td>{{ recruiter.user.username }}</td>
+                <td>{{ recruiter.user.email }}</td>
+                <td>{{ recruiter.company_name }}</td>
+                <td>{{ recruiter.place }}</td>
+                <td>{{ recruiter.phone_number|default:"—" }}</td>
+                <td>
+                    <span class="badge bg-success">Approved</span>
+                </td>
+                <td>
+                    <!-- ✅ FIX: pass USER ID, not profile ID -->
+                    <a href="{% url 'accounts:block_recruiter' recruiter.user.id %}"
+                       class="btn btn-danger btn-sm">
+                        Block
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">
+                    No approved recruiters found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'accounts:pending_recruiters' %}"
+       class="btn btn-secondary mt-3">
+        ← Back to Pending Recruiters
+    </a>
+</div>
+{% endblock %}

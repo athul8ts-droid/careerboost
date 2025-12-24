@@ -3,28 +3,40 @@
 {% block title %}Admin Messages{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container mt-4">
     <h2 class="mb-4">Support Messages</h2>
 
     {% if messages %}
-        <div class="list-group">
-            {% for msg in messages %}
-                <div class="list-group-item mb-3">
-                    <h5>
-                        {{ msg.subject }}
-                        <small class="text-muted">
-                            — {{ msg.user.username }}
-                        </small>
-                    </h5>
+        {% for msg in messages %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
 
-                    <p>{{ msg.message }}</p>
+                    <!-- Username + Role -->
+                    <h6 class="text-muted mb-2">
+                        {{ msg.user.username }} ({{ msg.user.role|upper }})
+                    </h6>
 
-                    <p class="text-muted">
+                    <!-- Subject -->
+                    <p class="mb-1">
+                        <strong>Subject:</strong> {{ msg.subject }}
+                    </p>
+
+                    <!-- User Message -->
+                    <p class="mb-2">
+                        <strong>Message:</strong><br>
+                        {{ msg.message }}
+                    </p>
+
+                    <!-- Timestamp -->
+                    <p class="text-muted small mb-2">
                         Sent on {{ msg.created_at|date:"d M Y, H:i" }}
                     </p>
 
+                    <hr>
+
+                    <!-- Admin Reply / Reply Button -->
                     {% if msg.admin_reply %}
-                        <div class="alert alert-success">
+                        <div class="alert alert-success mb-0">
                             <strong>Admin Reply:</strong><br>
                             {{ msg.admin_reply }}
                         </div>
@@ -34,9 +46,10 @@
                             Reply
                         </a>
                     {% endif %}
+
                 </div>
-            {% endfor %}
-        </div>
+            </div>
+        {% endfor %}
     {% else %}
         <p>No messages yet.</p>
     {% endif %}

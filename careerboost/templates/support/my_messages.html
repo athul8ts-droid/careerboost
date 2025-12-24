@@ -6,19 +6,39 @@
 
     {% if messages %}
         {% for msg in messages %}
-            <div class="card mb-3">
+            <div class="card mb-3 shadow-sm">
                 <div class="card-body">
-                    <strong>Subject:</strong> {{ msg.subject }} <br>
-                    <strong>Your Message:</strong>
-                    <p>{{ msg.message }}</p>
 
+                    <!-- Username + Role -->
+                    <h6 class="text-muted mb-2">
+                        {{ msg.user.username }} ({{ msg.user.role|upper }})
+                    </h6>
+
+                    <!-- Subject -->
+                    <p class="mb-1">
+                        <strong>Subject:</strong> {{ msg.subject }}
+                    </p>
+
+                    <!-- Message -->
+                    <p class="mb-2">
+                        <strong>Message:</strong><br>
+                        {{ msg.message }}
+                    </p>
+
+                    <hr>
+
+                    <!-- Admin Reply -->
                     {% if msg.admin_reply %}
-                        <hr>
-                        <strong>Admin Reply:</strong>
-                        <p>{{ msg.admin_reply }}</p>
+                        <p class="text-success mb-0">
+                            <strong>Admin Reply:</strong><br>
+                            {{ msg.admin_reply }}
+                        </p>
                     {% else %}
-                        <em>No reply yet</em>
+                        <p class="text-warning mb-0">
+                            <strong>Admin Reply:</strong> No reply yet
+                        </p>
                     {% endif %}
+
                 </div>
             </div>
         {% endfor %}

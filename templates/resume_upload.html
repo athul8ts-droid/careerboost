@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h3 class="text-center mb-4">Upload Your Resume</h3>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Select PDF File</label>
+
+                        <!-- FIXED NAME -->
+                        <input type="file" name="resume_file" accept="application/pdf" class="form-control" required>
+                    </div>
+
+                    <button class="btn btn-primary w-100">Analyze Resume</button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

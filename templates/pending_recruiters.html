@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Pending Recruiter Approvals</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if recruiters %}
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Place</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recruiter in recruiters %}
+                <tr>
+                    <!-- User fields -->
+                    <td>{{ recruiter.user.username }}</td>
+                    <td>{{ recruiter.user.email }}</td>
+
+                    <!-- RecruiterProfile fields -->
+                    <td>{{ recruiter.company_name }}</td>
+                    <td>{{ recruiter.place }}</td>
+                    <td>{{ recruiter.phone_number }}</td>
+
+                    <td>
+                        {% if recruiter.status == 'pending' %}
+                            ⏳ Pending
+                        {% elif recruiter.status == 'approved' %}
+                            ✅ Approved
+                        {% else %}
+                            ❌ Rejected
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'accounts:approve_recruiter' recruiter.id %}"
+                           class="btn btn-success btn-sm">
+                            Approve
+                        </a>
+
+                        <a href="{% url 'accounts:reject_recruiter' recruiter.id %}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Are you sure you want to reject this recruiter?');">
+                            Reject
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No pending recruiters.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

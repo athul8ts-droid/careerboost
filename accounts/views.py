@@ -3,11 +3,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth import get_user_model, authenticate, login
 from django.conf import settings
-from django.core.mail import send_mail
 
 from job_app.models import Job
 from .models import RecruiterProfile
-from .models import ContactAdminMessage
+
 
 
 
@@ -19,6 +18,7 @@ User = get_user_model()
 # =========================
 def is_admin(user):
     return user.is_superuser or getattr(user, "role", None) == "ADMIN"
+
 
 
 # =========================
@@ -253,6 +253,3 @@ def custom_login(request):
     return render(request, "accounts/login.html")
 
 
-# =========================
-# CONTACT ADMIN
-# =========================

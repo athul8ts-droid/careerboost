@@ -17,6 +17,7 @@ from accounts.decorators import recruiter_required
 from accounts.models import RecruiterProfile
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from django.db.models import Q
 
 
 
@@ -51,20 +52,36 @@ def add_job(request):
 # ============================================================
 @login_required
 def job_list(request):
-    """
-    Displays all jobs (latest first).
-    """
+    query = request.GET.get("q")
 
-    jobs = Job.objects.all().order_by('-created_at')
-    return render(request, 'job_list.html', {'jobs': jobs})
+    jobs = Job.objects.filter(
+        posted_by__recruiterprofile__status="approved",
+        is_active=True
+    )
 
+    if query:
+        jobs = jobs.filter(
+            Q(title__icontains=query) |
+            Q(company__icontains=query) |
+            Q(location__icontains=query)
+        )
 
+    return render(request, "jobs/job_list.html", {
+        "jobs": jobs,
+        "query": query
+    })
 # ============================================================
 # JOB DETAIL
 # ============================================================
 @login_required
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)
+
+    # 🚫 Block access if recruiter is not approved
+    recruiter_profile = getattr(job.posted_by, "recruiterprofile", None)
+    if not recruiter_profile or recruiter_profile.status != "approved":
+        messages.error(request, "This job is no longer available.")
+        return redirect("job_app:job_list")
 
     has_applied = False
 
@@ -79,7 +96,7 @@ def job_detail(request, job_id):
         "has_applied": has_applied,
     }
 
-    return render(request, "job_detail.html", context)
+    return render(request, "jobs/job_detail.html", context)
 
 
 # ============================================================
@@ -117,6 +134,20 @@ def apply_job(request, job_id):
 
     job = get_object_or_404(Job, id=job_id)
 
+    # 🚫 Block application if recruiter is not approved
+    recruiter_profile = getattr(job.posted_by, "recruiterprofile", None)
+    if not recruiter_profile or recruiter_profile.status != "approved":
+        messages.error(
+            request,
+            "Applications for this job are currently disabled."
+        )
+        return redirect("job_app:job_list")
+
+    # 🚫 Prevent duplicate applications
+    if JobApplication.objects.filter(job=job, user=request.user).exists():
+        messages.warning(request, "You have already applied for this job.")
+        return redirect("job_app:job_detail", job_id=job.id)
+
     if request.method == "POST":
         resume = request.FILES.get("resume")
         cover_letter = request.POST.get("cover_letter")
@@ -128,9 +159,10 @@ def apply_job(request, job_id):
             cover_letter=cover_letter
         )
 
+        messages.success(request, "Application submitted successfully!")
         return redirect("job_app:application_success")
 
-    return render(request, "apply_job.html", {"job": job})
+    return render(request, "jobs/apply_job.html", {"job": job})
 
 
 # ============================================================

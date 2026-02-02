@@ -4,21 +4,21 @@ Job App Views
 Handles:
 - Job creation (approved recruiters only)
 - Job listing & details
-- Job deletion (admin only)
+- Job deletion (job owner or admin)
 - Job applications
+- View applicants (recruiter only)
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+from django.db.models import Q
 
 from .forms import JobForm
 from .models import Job, JobApplication
 from accounts.decorators import recruiter_required
 from accounts.models import RecruiterProfile
-from django.contrib import messages
-from django.http import HttpResponseForbidden
-from django.db.models import Q
-
 
 
 # ============================================================
@@ -26,29 +26,32 @@ from django.db.models import Q
 # ============================================================
 @login_required
 @recruiter_required
-@login_required
-@recruiter_required
 def add_job(request):
     """
     Allows only approved recruiters to post jobs.
     """
+
+    recruiter_profile = getattr(request.user, "recruiterprofile", None)
+    if not recruiter_profile or recruiter_profile.status != "approved":
+        messages.error(request, "Your recruiter account is not approved yet.")
+        return redirect("accounts:recruiter_dashboard")
+
     if request.method == "POST":
         form = JobForm(request.POST)
         if form.is_valid():
             job = form.save(commit=False)
-            job.posted_by = request.user   
+            job.posted_by = request.user
             job.save()
             messages.success(request, "Job posted successfully.")
-            return redirect("dashboard")
+            return redirect("accounts:recruiter_dashboard")
     else:
         form = JobForm()
 
-    return render(request, "add_job.html", {"form": form})
-
+    return render(request, "jobs/add_job.html", {"form": form})
 
 
 # ============================================================
-# JOB LIST
+# JOB LIST (USERS)
 # ============================================================
 @login_required
 def job_list(request):
@@ -70,6 +73,8 @@ def job_list(request):
         "jobs": jobs,
         "query": query
     })
+
+
 # ============================================================
 # JOB DETAIL
 # ============================================================
@@ -77,49 +82,49 @@ def job_list(request):
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)
 
-    # 🚫 Block access if recruiter is not approved
     recruiter_profile = getattr(job.posted_by, "recruiterprofile", None)
     if not recruiter_profile or recruiter_profile.status != "approved":
         messages.error(request, "This job is no longer available.")
         return redirect("job_app:job_list")
 
-    has_applied = False
+    has_applied = JobApplication.objects.filter(
+        job=job,
+        user=request.user
+    ).exists()
 
-    if request.user.is_authenticated:
-        has_applied = JobApplication.objects.filter(
-            job=job,
-            user=request.user
-        ).exists()
-
-    context = {
+    return render(request, "jobs/job_detail.html", {
         "job": job,
-        "has_applied": has_applied,
-    }
-
-    return render(request, "jobs/job_detail.html", context)
+        "has_applied": has_applied
+    })
 
 
 # ============================================================
-# DELETE JOB (ADMIN ONLY)
+# DELETE JOB (OWNER OR ADMIN)
 # ============================================================
 @login_required
 def delete_job(request, job_id):
 
-    # Only allow POST
     if request.method != "POST":
         return HttpResponseForbidden("Invalid request")
 
     job = get_object_or_404(Job, id=job_id)
 
-    # Ownership check (MOST IMPORTANT)
-    if job.posted_by != request.user:
-        return HttpResponseForbidden("You are not allowed to delete this job")
+    # Admin can delete any job
+    if request.user.is_superuser:
+        job.delete()
+        messages.success(request, "Job deleted successfully.")
+        return redirect("admin_dashboard")
 
-    # Recruiter approval check
-    if not request.user.is_approved:
-        return HttpResponseForbidden("Recruiter not approved")
+    # Recruiter can delete ONLY their job
+    if job.posted_by != request.user:
+        return HttpResponseForbidden("You are not allowed to delete this job.")
+
+    recruiter_profile = getattr(request.user, "recruiterprofile", None)
+    if not recruiter_profile or recruiter_profile.status != "approved":
+        return HttpResponseForbidden("Recruiter not approved.")
 
     job.delete()
+    messages.success(request, "Job deleted successfully.")
     return redirect("accounts:recruiter_dashboard")
 
 
@@ -134,16 +139,11 @@ def apply_job(request, job_id):
 
     job = get_object_or_404(Job, id=job_id)
 
-    # 🚫 Block application if recruiter is not approved
     recruiter_profile = getattr(job.posted_by, "recruiterprofile", None)
     if not recruiter_profile or recruiter_profile.status != "approved":
-        messages.error(
-            request,
-            "Applications for this job are currently disabled."
-        )
+        messages.error(request, "Applications for this job are disabled.")
         return redirect("job_app:job_list")
 
-    # 🚫 Prevent duplicate applications
     if JobApplication.objects.filter(job=job, user=request.user).exists():
         messages.warning(request, "You have already applied for this job.")
         return redirect("job_app:job_detail", job_id=job.id)
@@ -168,27 +168,27 @@ def apply_job(request, job_id):
 # ============================================================
 # APPLICATION SUCCESS
 # ============================================================
-def application_success(request):
-    """
-    Shows success message after applying.
-    """
-
-    return render(request, 'application_success.html')
-
-
 @login_required
+def application_success(request):
+    return render(request, "jobs/application_success.html")
+
+
+# ============================================================
+# VIEW APPLICANTS (RECRUITER)
+# ============================================================
+@login_required
+@recruiter_required
 def view_applicants(request, job_id):
 
-    # 🔒 Security: recruiter can see only THEIR job
     job = get_object_or_404(
         Job,
         id=job_id,
         posted_by=request.user
     )
 
-    applications = job.applications.select_related('user')
+    applications = job.applications.select_related("user")
 
-    return render(request, 'view_applicants.html', {
-        'job': job,
-        'applications': applications
+    return render(request, "jobs/view_applicants.html", {
+        "job": job,
+        "applications": applications
     })

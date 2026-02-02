@@ -9,22 +9,20 @@ class Resume(models.Model):
         related_name='resumes'
     )
 
-    # File upload field
     resume_file = models.FileField(upload_to='resumes/')
-
-    # Auto timestamp of upload
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     # Extracted resume text
     analyzed_text = models.TextField(blank=True, null=True)
 
-    # AI Match Score / ATS Score
-    score = models.IntegerField(blank=True, null=True)
+    # ✅ ADD THIS
+    job_description = models.TextField(blank=True, null=True)
 
-    # AI suggestions for improvement
+    # ATS Score
+    score = models.FloatField(blank=True, null=True)
+
+    # Optional AI fields
     suggestions = models.TextField(blank=True, null=True)
-
-    # Optional: AI-generated summary of the resume
     summary = models.TextField(blank=True, null=True)
 
     def __str__(self):

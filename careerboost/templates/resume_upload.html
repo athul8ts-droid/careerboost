@@ -1,24 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-8">
 
         <div class="card shadow-sm">
             <div class="card-body">
 
-                <h3 class="text-center mb-4">Upload Your Resume</h3>
+                <h3 class="text-center mb-4">ATS Resume Analyzer</h3>
 
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
 
+                    <!-- Resume Upload -->
                     <div class="mb-3">
-                        <label class="form-label">Select PDF File</label>
-
-                        <!-- FIXED NAME -->
-                        <input type="file" name="resume_file" accept="application/pdf" class="form-control" required>
+                        <label class="form-label">Upload Resume (PDF)</label>
+                        <input 
+                            type="file" 
+                            name="resume_file" 
+                            accept="application/pdf" 
+                            class="form-control" 
+                            required
+                        >
                     </div>
 
-                    <button class="btn btn-primary w-100">Analyze Resume</button>
+                    <!-- Job Description Input -->
+                    <div class="mb-3">
+                        <label class="form-label">Paste Job Description</label>
+                        <textarea 
+                            name="job_description" 
+                            rows="8" 
+                            class="form-control"
+                            placeholder="Paste the job description here..."
+                            required
+                        ></textarea>
+                    </div>
+
+                    <!-- Submit -->
+                    <button class="btn btn-primary w-100">
+                        Analyze ATS Score
+                    </button>
+
                 </form>
 
             </div>
@@ -26,4 +48,5 @@
 
     </div>
 </div>
+
 {% endblock %}

@@ -2,13 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth import get_user_model, authenticate, login
-from django.conf import settings
 
 from job_app.models import Job
 from .models import RecruiterProfile
-
-
-
 
 User = get_user_model()
 
@@ -20,15 +16,22 @@ def is_admin(user):
     return user.is_superuser or getattr(user, "role", None) == "ADMIN"
 
 
-
 # =========================
 # ADMIN – PENDING RECRUITERS
 # =========================
 @login_required
 @user_passes_test(is_admin)
 def pending_recruiters(request):
-    recruiters = RecruiterProfile.objects.filter(status="pending").select_related("user")
-    return render(request, "accounts/pending_recruiters.html", {"recruiters": recruiters})
+    recruiters = (
+        RecruiterProfile.objects
+        .filter(status="pending")
+        .select_related("user")
+    )
+    return render(
+        request,
+        "accounts/pending_recruiters.html",
+        {"recruiters": recruiters}
+    )
 
 
 # =========================
@@ -37,11 +40,12 @@ def pending_recruiters(request):
 @login_required
 @user_passes_test(is_admin)
 def approve_recruiter(request, user_id):
-    user = get_object_or_404(CustomUser, id=user_id)
+    user = get_object_or_404(User, id=user_id, role="RECRUITER")
     profile = get_object_or_404(RecruiterProfile, user=user)
 
-    user.is_approved = True
+    # 🔥 SINGLE SOURCE OF TRUTH
     user.is_active = True
+    user.is_approved = True
     user.save()
 
     profile.status = "approved"
@@ -49,7 +53,6 @@ def approve_recruiter(request, user_id):
 
     messages.success(request, "Recruiter approved successfully.")
     return redirect("accounts:pending_recruiters")
-
 
 
 # =========================
@@ -60,20 +63,19 @@ def approve_recruiter(request, user_id):
 def block_recruiter(request, user_id):
     profile = get_object_or_404(
         RecruiterProfile,
-        user__id=user_id   # ✅ CORRECT LOOKUP
+        user__id=user_id
     )
 
     profile.status = "blocked"
-    profile.user.is_active = False
-    profile.user.save()
     profile.save()
 
-    messages.success(
-        request,
-        "Recruiter blocked successfully."
-    )
+    profile.user.is_active = False
+    profile.user.is_approved = False
+    profile.user.save()
 
+    messages.success(request, "Recruiter blocked successfully.")
     return redirect("accounts:approved_recruiters")
+
 
 # =========================
 # ADMIN – UNBLOCK RECRUITER
@@ -87,15 +89,13 @@ def unblock_recruiter(request, user_id):
     )
 
     profile.status = "approved"
-    profile.user.is_active = True
-    profile.user.save()
     profile.save()
 
-    messages.success(
-        request,
-        "Recruiter unblocked successfully."
-    )
+    profile.user.is_active = True
+    profile.user.is_approved = True
+    profile.user.save()
 
+    messages.success(request, "Recruiter unblocked successfully.")
     return redirect("accounts:blocked_recruiters")
 
 
@@ -105,8 +105,11 @@ def unblock_recruiter(request, user_id):
 @login_required
 @user_passes_test(is_admin)
 def approved_recruiters(request):
-    recruiters = RecruiterProfile.objects.filter(status="approved")
-
+    recruiters = (
+        RecruiterProfile.objects
+        .filter(status="approved")
+        .select_related("user")
+    )
     return render(
         request,
         "accounts/approved_recruiters.html",
@@ -120,7 +123,11 @@ def approved_recruiters(request):
 @login_required
 @user_passes_test(is_admin)
 def blocked_recruiters(request):
-    recruiters = RecruiterProfile.objects.filter(status="blocked")
+    recruiters = (
+        RecruiterProfile.objects
+        .filter(status="blocked")
+        .select_related("user")
+    )
     return render(
         request,
         "accounts/blocked_recruiters.html",
@@ -146,6 +153,8 @@ def recruiter_register(request):
             email=email,
             password=password,
             role="RECRUITER",
+            is_active=True,
+            is_approved=False,   # 🔥 DEFAULT
         )
 
         RecruiterProfile.objects.create(
@@ -158,7 +167,10 @@ def recruiter_register(request):
             status="pending",
         )
 
-        messages.success(request, "Registration successful. Await admin approval.")
+        messages.success(
+            request,
+            "Registration successful. Await admin approval."
+        )
         return redirect("accounts:login")
 
     return render(request, "accounts/recruiter_register.html")
@@ -175,9 +187,7 @@ def dashboard(request):
         return redirect("accounts:pending_recruiters")
 
     if user.role == "RECRUITER":
-        profile = get_object_or_404(RecruiterProfile, user=user)
-
-        if profile.status in ["pending", "blocked"]:
+        if not user.is_approved:
             return redirect("accounts:pending_approval")
 
         return redirect("accounts:recruiter_dashboard")
@@ -190,17 +200,20 @@ def dashboard(request):
 # =========================
 @login_required
 def recruiter_dashboard(request):
-    profile = get_object_or_404(RecruiterProfile, user=request.user)
+    user = request.user
+    profile = get_object_or_404(RecruiterProfile, user=user)
 
-    if profile.status != "approved":
+    if not user.is_approved or profile.status != "approved":
         return redirect("accounts:pending_approval")
 
-    jobs = Job.objects.filter(posted_by=request.user).order_by("-created_at")
+    jobs = Job.objects.filter(
+        posted_by=user
+    ).order_by("-created_at")
 
     return render(
         request,
         "accounts/recruiter_dashboard.html",
-        {"profile": profile, "jobs": jobs},
+        {"profile": profile, "jobs": jobs}
     )
 
 
@@ -215,20 +228,17 @@ def pending_approval(request):
 # =========================
 # LOGIN
 # =========================
-
 def custom_login(request):
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "").strip()
 
-        # 🔍 STEP 1: Check if user exists
         try:
             user_obj = User.objects.get(username=username)
         except User.DoesNotExist:
             messages.error(request, "Invalid username or password.")
             return redirect("accounts:login")
 
-        # 🚫 STEP 2: Blocked user check
         if not user_obj.is_active:
             messages.error(
                 request,
@@ -236,7 +246,6 @@ def custom_login(request):
             )
             return redirect("accounts:login")
 
-        # 🔐 STEP 3: Authenticate credentials
         user = authenticate(
             request,
             username=username,
@@ -251,5 +260,3 @@ def custom_login(request):
         return redirect("accounts:login")
 
     return render(request, "accounts/login.html")
-
-

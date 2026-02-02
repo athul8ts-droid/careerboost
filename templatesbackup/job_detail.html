@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2>{{ job.title }}</h2>
+    <p><strong>Location:</strong> {{ job.location }}</p>
+    <p><strong>Company:</strong> {{ job.company_name }}</p>
+    <p><strong>Posted on:</strong> {{ job.created_at|date:"d M Y" }}</p>
+
+    <hr>
+
+    <h5>Job Description</h5>
+    <p>{{ job.description }}</p>
+
+    <h5>Required Skills</h5>
+    <p>{{ job.skills_required }}</p>
+
+    <hr>
+
+    {% if user.is_authenticated %}
+
+        {% if user.is_superuser or user.is_staff %}
+            <!-- Admin should not apply -->
+            <p class="text-muted">Admins cannot apply for jobs.</p>
+
+        {% elif user.profile.role == "recruiter" %}
+            <!-- Recruiter should not apply -->
+            <p class="text-muted">Recruiters cannot apply for jobs.</p>
+
+        {% elif has_applied %}
+            <button class="btn btn-secondary" disabled>
+                Already Applied
+            </button>
+
+        {% else %}
+            <a href="{% url 'job_app:apply_job' job.id %}" class="btn btn-primary">
+                Apply for Job
+            </a>
+        {% endif %}
+
+    {% else %}
+        <a href="{% url 'login' %}" class="btn btn-warning">
+            Login to Apply
+        </a>
+    {% endif %}
+
+</div>
+{% endblock %}

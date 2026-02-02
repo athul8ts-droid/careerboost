@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="fw-bold">Welcome {{ request.user.username }} 👋</h3>
+    <p class="text-muted mb-4">
+        Analyze your resume and apply for jobs posted by recruiters.
+    </p>
+
+    <div class="row">
+
+        <!-- Resume Analyzer -->
+        <div class="col-md-6 mb-3">
+            <div class="feature-card">
+                <h5>Resume Analyzer</h5>
+                <p>
+                    Upload your resume and get skill matching insights
+                    using AI.
+                </p>
+                <a href="{% url 'resume:upload_resume' %}" class="feature-btn">
+                    Analyze Resume →
+                </a>
+            </div>
+        </div>
+
+        <!-- Job Listings -->
+        <div class="col-md-6 mb-3">
+            <div class="feature-card">
+                <h5>Job Listings</h5>
+                <p>
+                    Browse jobs posted by recruiters and apply easily.
+                </p>
+                <a href="{% url 'jobs:job_list' %}" class="feature-btn">
+                    View Jobs →
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.feature-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fff;
+    height: 100%;
+}
+
+.feature-card h5 {
+    font-weight: 600;
+}
+
+.feature-card p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 10px 0 15px;
+}
+
+.feature-btn {
+    font-weight: 500;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.feature-btn:hover {
+    text-decoration: underline;
+}
+</style>
+
+{% endblock %}

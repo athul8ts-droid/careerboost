@@ -11,7 +11,8 @@ urlpatterns = [
     # ==================================================
     path("login/", views.custom_login, name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path("dashboard/", views.dashboard, name="dashboard"),
+
     # ==================================================
     # RECRUITER – REGISTRATION & DASHBOARD
     # ==================================================
@@ -30,7 +31,6 @@ urlpatterns = [
         views.pending_approval,
         name="pending_approval"
     ),
-    
 
     # ==================================================
     # ADMIN – RECRUITER APPROVAL FLOW
@@ -41,11 +41,10 @@ urlpatterns = [
         name="pending_recruiters"
     ),
     path(
-        "recruiters/approve/<int:recruiter_id>/",
+        "recruiters/approve/<int:user_id>/",
         views.approve_recruiter,
         name="approve_recruiter"
     ),
-
 
     # ==================================================
     # ADMIN – APPROVED / BLOCK / UNBLOCK
@@ -70,7 +69,4 @@ urlpatterns = [
         views.unblock_recruiter,
         name="unblock_recruiter"
     ),
-
-
-
 ]

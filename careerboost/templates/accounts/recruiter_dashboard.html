@@ -6,17 +6,18 @@
 <p>Post jobs and manage applications.</p>
 
 <!-- Recruiter Approval Status -->
-{% if profile.status == "approved" %}
+{% if request.user.is_approved %}
+
     <p style="color: green;">✅ Approved Recruiter</p>
 
-    <a href="{% url 'job_app:add_job' %}" class="btn btn-primary mb-3">
+    <a href="{% url 'job_app:add_job' %}" class="btn btn-primary">
         Post New Job
-    </a>
+    </a>    
 {% else %}
     <p style="color: orange;">⏳ Pending Approval</p>
 
     <button class="btn btn-secondary mb-3" disabled>
-        Post New Job (Approval Required)
+        Post New Job 
     </button>
 
     <p>
@@ -45,11 +46,16 @@
                     View Applicants ({{ job.applications.count }})
                 </a>
 
-                <!-- DELETE JOB -->
-                <a class="btn btn-danger btn-sm"
-                   href="{% url 'job_app:delete_job' job.id %}">
-                    Delete Job
-                </a>
+                <!-- DELETE JOB (POST ONLY ✅) -->
+                <form method="post"
+                      action="{% url 'job_app:delete_job' job.id %}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Are you sure you want to delete this job?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Delete Job
+                    </button>
+                </form>
             </li>
         {% endfor %}
     </ul>

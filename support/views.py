@@ -49,15 +49,14 @@ def contact_admin(request):
 # ===============================
 @login_required
 def my_messages(request):
-    messages_qs = SupportMessage.objects.filter(
+    support_messages = SupportMessage.objects.filter(
         user=request.user
-    ).order_by("-created_at")
+    ).order_by('-created_at')
 
-    return render(
-        request,
-        "support/my_messages.html",
-        {"messages": messages_qs}
-    )
+    return render(request, "support/my_messages.html", {
+        "support_messages": support_messages
+    })
+
 
 
 # ===============================
@@ -65,12 +64,12 @@ def my_messages(request):
 # ===============================
 @staff_member_required
 def admin_message_list(request):
-    messages_qs = SupportMessage.objects.all().order_by("-created_at")
+    support_messages = SupportMessage.objects.all().order_by("-created_at")
 
     return render(
         request,
         "support/admin_message_list.html",
-        {"messages": messages_qs}
+        {"support_messages": support_messages}
     )
 
 

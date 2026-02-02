@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .pending-box {
+        max-width: 500px;
+        margin: 80px auto;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px;
+        background: #f8f9fa;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .pending-box h2 {
+        color: #ff9800;
+        margin-bottom: 15px;
+    }
+
+    .pending-box p {
+        color: #555;
+        font-size: 16px;
+    }
+
+    .logout-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #dc3545;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .logout-btn:hover {
+        background: #b02a37;
+    }
+</style>
+
+<div class="pending-box">
+    <h2>⏳ Account Pending Approval</h2>
+
+    <p>Your recruiter account is currently under review.</p>
+    <p>Please wait until an admin approves your account.</p>
+
+    <a href="{% url 'logout' %}" class="logout-btn">
+        Logout
+    </a>
+</div>
+{% endblock %}

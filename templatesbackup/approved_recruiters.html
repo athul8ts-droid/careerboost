@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Approved Recruiters</h2>
+
+    <a href="{% url 'accounts:pending_recruiters' %}"
+       class="btn btn-secondary mb-3">
+        ← Back to Pending Recruiters
+    </a>
+
+    {% if recruiters %}
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Place</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recruiter in recruiters %}
+                <tr>
+                    <td>{{ recruiter.user.username }}</td>
+                    <td>{{ recruiter.user.email }}</td>
+                    <td>{{ recruiter.company_name }}</td>
+                    <td>{{ recruiter.place }}</td>
+                    <td>{{ recruiter.phone_number }}</td>
+
+                    <td>
+                        {% if recruiter.is_blocked %}
+                            🚫 Blocked
+                        {% else %}
+                            ✅ Active
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if recruiter.is_blocked %}
+                            <a href="{% url 'accounts:unblock_recruiter' recruiter.id %}"
+                               class="btn btn-success btn-sm">
+                                Unblock
+                            </a>
+                        {% else %}
+                            <a href="{% url 'accounts:block_recruiter' recruiter.id %}"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Block this recruiter?');">
+                                Block
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No approved recruiters</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+
+{% endblock %}
